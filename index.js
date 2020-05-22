@@ -15,17 +15,17 @@ module.exports = class Logger {
   }
 
   subscriptions() {
-    this.subscribe('message', this.actOnMessage);
+    this.subscribe('message', this.actOnMessage.bind(this));
   }
 
   routes() {
-    this.route('get', 'log', this.getLog);
-    this.route('delete', 'log', this.deleteLog);
+    this.route('get', 'log', this.getLog.bind(this));
+    this.route('delete', 'log', this.deleteLog.bind(this));
   }
 
   /********* Event Functions *********/
 
-  actOnMessage = (message, event, sender, extras) => {
+  actOnMessage(message, event, sender, extras) {
     if (!this.shouldLog(event)) { return; }
 
     const eventColor = extras.color || 'blue';
@@ -43,12 +43,12 @@ module.exports = class Logger {
 
   /********* Route Functions *********/
 
-  getLog = async (req, res) => {
+  async getLog(req, res) {
     const log = await this.readLog();
     return res.status(200).send(log.toString());
   };
 
-  deleteLog = async (req, res) => {
+  async deleteLog(req, res) {
     await this.deleteLog();
     return res.status(200).send();
   };
@@ -65,8 +65,8 @@ module.exports = class Logger {
     }
   }
 
-  async deleteLog() {
-    return await fs.writeFile(this.logFile, '');
+  deleteLog() {
+    return fs.writeFile(this.logFile, '');
   }
 
   async readLog() {
